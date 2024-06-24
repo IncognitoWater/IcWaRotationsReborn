@@ -1,1 +1,1 @@
-﻿[assembly: AssemblyLink(Donate = "https://ko-fi.com/incognitowater", UserName = "IncognitoWater", Repository = "https://github.com/IncognitoWater/IcWaRotationReborn")]
+﻿[assembly: AssemblyLink(Donate = "https://ko-fi.com/incognitowater", UserName = "IncognitoWater", Repository = "IcWaRotationsReborn")]
