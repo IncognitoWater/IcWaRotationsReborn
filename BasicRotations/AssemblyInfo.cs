@@ -1,1 +1,0 @@
-﻿[assembly: AssemblyLink(Donate = "https://ko-fi.com/incognitowater", UserName = "IncognitoWater", Repository = "None")]
