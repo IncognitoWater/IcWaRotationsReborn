@@ -2,6 +2,8 @@
 
 namespace IcWaRotations.Magical;
 
+
+//RebornUpdatedVersion
 [Rotation("IncognitoWater's SMN", CombatType.Both, GameVersion = "6.38")]
 [SourceCode(Path = "main/DefaultRotations/Magical/SMN_Default.cs")]
 [Api(1)]
