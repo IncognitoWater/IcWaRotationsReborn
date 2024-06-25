@@ -3,7 +3,7 @@
 namespace IcWaRotations.Magical;
 
 [Rotation("IncognitoWater's SMN", CombatType.Both, GameVersion = "6.38")]
-[SourceCode(Path = "main/DefaultRotations/Magical/SMN_Default.cs")]
+[SourceCode(Path = "main/IcWaRotations/Magical/Smn_Rota.cs")]
 [Api(1)]
 public sealed class SmnRotation : SummonerRotation
 {

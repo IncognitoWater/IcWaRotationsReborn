@@ -1,7 +1,7 @@
 ﻿namespace DefaultRotations.Ranged;
 
 [Rotation("IncognitoWater's Delayed Tools", CombatType.Both, GameVersion = "6.38")]
-[SourceCode(Path = "main/DefaultRotations/Magical/SMN_Default.cs")]
+[SourceCode(Path = "main/IcWaRotations/Ranged/Mch_Rota.cs")]
 [Api(1)]
 public sealed class MchRotation : MachinistRotation
 {
