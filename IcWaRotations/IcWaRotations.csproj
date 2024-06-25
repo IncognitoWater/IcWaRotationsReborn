@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-	  <Version>1.0.1.1</Version>
 	  <TargetFramework>net8.0-windows</TargetFramework>
 	  <ImplicitUsings>enable</ImplicitUsings>
 	  <Authors>Incognito Water</Authors>
@@ -10,9 +9,6 @@
 	  <Nullable>enable</Nullable>
 	  <DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="RotationSolverReborn.Basic" Version="4.1.1.7" />
-  </ItemGroup>
   <ItemGroup>
 	  <Reference Include="Dalamud">
 		  <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
@@ -57,5 +53,8 @@
 	  <Using Include="RotationSolver.Basic.Rotations.Basic" />
 	  <Using Include="System.Numerics" />
 	  <Using Include="System.Reflection" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="RotationSolverReborn.Basic" Version="4.1.1.14" />
   </ItemGroup>
 </Project>
