@@ -2,100 +2,81 @@
 
 namespace IcWaRotations.Magical;
 
-
 [Rotation("IncognitoWater's SMN", CombatType.Both, GameVersion = "6.38")]
 [SourceCode(Path = "main/DefaultRotations/Magical/SMN_Default.cs")]
 [Api(1)]
 public sealed class SmnRotation : SummonerRotation
 {
+	private const ActionID SummonBahamutPvPActionId = (ActionID)29673;
+	private const ActionID SummonPhoenixPvPActionId = (ActionID)29678;
+	
+	private readonly IBaseAction SummonBahamutPvP = new BaseAction(SummonBahamutPvPActionId);
+	private readonly IBaseAction SummonPhoenixPvP = new BaseAction(SummonPhoenixPvPActionId);
+
+	
 	public enum SwiftType : byte
 	{
 		No,
 		Emerald,
 		Ruby,
-		All,
+		All
 	}
-	
+
 	public enum SummonOrderType : byte
 	{
-		[Description("Topaz-Emerald-Ruby")]
-		TopazEmeraldRuby,
+		[Description("Topaz-Emerald-Ruby")] TopazEmeraldRuby,
 
-		[Description("Topaz-Ruby-Emerald")]
-		TopazRubyEmerald,
+		[Description("Topaz-Ruby-Emerald")] TopazRubyEmerald,
 
-		[Description("Emerald-Topaz-Ruby")]
-		EmeraldTopazRuby,
+		[Description("Emerald-Topaz-Ruby")] EmeraldTopazRuby
 	}
 
 	[RotationConfig(CombatType.PvE, Name = "Order")]
 	public SummonOrderType SummonOrder { get; set; } = SummonOrderType.EmeraldTopazRuby;
-	
+
 	[RotationConfig(CombatType.PvE, Name = "SwiftCast")]
 	public SwiftType AddSwiftCast { get; set; } = SwiftType.No;
-	
+
 	[RotationConfig(CombatType.PvE, Name = "Use Crimson Cyclone. Will use at any range, regardless of saftey use with caution.")]
 	public bool AddCrimsonCyclone { get; set; } = true;
-	
+
 	[RotationConfig(CombatType.PvE, Name = "Use radiant on cooldown. But still keeping one charge")]
 	public bool RadiantOnCooldown { get; set; } = false;
-	
+
 	[RotationConfig(CombatType.PvE, Name = "Settings for working with orbwalker")]
 	public bool OrbWalkerAdjust { get; set; } = false;
+
+	[RotationConfig(CombatType.PvP, Name = "Use BahamutLB")]
+	public bool UseBahamutPvP { get; set; } = false;
 	
-	
-	[RotationConfig(CombatType.PvP, Name = "Use CrimsonCyclon in PvP")]
-	public bool CrimsonCycloneInPvP { get; set; } = false;
-	
-	[RotationConfig(CombatType.PvP, Name = "Avoid Rs use speel with enemy on Guard in PvP")]
+	[RotationConfig(CombatType.PvP, Name = "Use PhoenixLB")]
+	public bool UsePhoenixPvP { get; set; } = false;
+
+	// [RotationConfig(CombatType.PvP, Name = "Use CrimsonCyclon in PvP")]
+	// public bool CrimsonCycloneInPvP { get; set; } = false;
+	//
+	// [RotationConfig(CombatType.PvP, Name = "Crimson Special only on enemy with less than 20k")]
+	// public bool CrimsonSpecial { get; set; } = false;
+
+	[RotationConfig(CombatType.PvP, Name = "Avoid Rs use spells with enemy on Guard in PvP")]
 	public bool GuardCancel { get; set; } = false;
-	
-	[RotationConfig(CombatType.PvP, Name = "Crimson Spcial only on enemy with less than 20k")]
-	public bool CrimsonSpecial { get; set; } = false;
-	
-	
+
 	public override bool CanHealSingleSpell => false;
-	
+
 	protected override bool MoveForwardGCD(out IAction? act)
 	{
 		if (CrimsonCyclonePvE.CanUse(out act, skipAoeCheck: true)) return true;
 		return base.MoveForwardGCD(out act);
 	}
-	
+
 
 	private float GetPlayerHealthPercent()
 	{
-		return (Player.CurrentHp / Player.MaxHp) * 100;
+		return Player.CurrentHp / Player.MaxHp * 100;
 	}
-	
+
 	protected override bool GeneralGCD(out IAction? act)
 	{
-		act = null;
-
-		#region PvP
-		if (GuardCancel && Player.HasStatus(true, StatusID.Guard)) return false;
-		if (Player.HasStatus(true, StatusID.DreadwyrmTrance))
-		{
-			if (AstralImpulsePvP.CanUse(out act)) return true;
-		}
-		if (Player.HasStatus(true, StatusID.FirebirdTrance))
-		{
-			if (FountainOfFirePvP.CanUse(out act)) return true;
-		}
-		if (CrimsonCycloneInPvP && CrimsonSpecial)
-		{
-			if ((HostileTarget && HostileTarget.CurrentHp < 20000)
-				&&CrimsonCyclonePvP.CanUse(out act)) return true;
-		}
-		if (CrimsonCycloneInPvP && !CrimsonSpecial)
-		{
-			if (CrimsonCyclonePvP.CanUse(out act)) return true;
-		}
-		if (IsLastGCD(ActionID.CrimsonCyclonePvP) && CrimsonStrikePvP.CanUse(out act)) return true;
-		if (SlipstreamPvP.CanUse(out act)) return true;
-		if (RuinIiiPvP.CanUse(out act)) return true;
-		#endregion
-
 		#region PvE
 		//Spawning carbuncle + attempting to avoid unwanted try of spawning carbuncle
 		if (OrbWalkerAdjust)
@@ -195,54 +176,73 @@ public sealed class SmnRotation : SummonerRotation
 		{
 			if (RuinPvE.CanUse(out act)) return true;
 		}
-		return base.GeneralGCD(out act);
 		#endregion
+		
+		#region PvP
+		if (GuardCancel && Player.HasStatus(true, StatusID.Guard))return base.GeneralGCD(out act);
+		if (Player.HasStatus(true, StatusID.DreadwyrmTrance))
+		{
+			if (AstralImpulsePvP.CanUse(out act)) return true;
+		}
+		if (Player.HasStatus(true, StatusID.FirebirdTrance))
+		{
+			if (FountainOfFirePvP.CanUse(out act)) return true;
+		}
+		// if (CrimsonCycloneInPvP && CrimsonSpecial)
+		// {
+		// 	if (HostileTarget && HostileTarget?.CurrentHp < 20000
+		// 		&& CrimsonCyclonePvP.CanUse(out act,CanUseOption.SkipStatusProvideCheck)) return true;
+		// }
+		// if (CrimsonCycloneInPvP && !CrimsonSpecial)
+		// {
+		// 	if (CrimsonCyclonePvP.CanUse(out act,CanUseOption.SkipStatusProvideCheck)) return true;
+		// }
+		//if (CrimsonStrikePvP.CanUse(out act)) return true;
+		if (SlipstreamPvP.CanUse(out act, CanUseOption.SkipAoeCheck)) return true;
+		if (RuinIiiPvP.CanUse(out act)) return true;
+		#endregion
+		return base.GeneralGCD(out act);
 	}
 
-	protected override bool AttackAbility(IAction nextGCD,out IAction? act)
+	protected override bool AttackAbility(IAction nextGCD, out IAction? act)
 	{
 		#region PvE
 		if (IsBurst && !Player.HasStatus(false, StatusID.SearingLight))
 		{
 			//Burst raidbuff searinglight
-			if (SearingLightPvE.CanUse(out act, skipAoeCheck:true)) return true;
+			if (SearingLightPvE.CanUse(out act, skipAoeCheck: true)) return true;
 		}
 
 
 		//Burst for bahamut
-		if ((InBahamut && SummonBahamutPvE.Cooldown.ElapsedOneChargeAfterGCD(3) || InPhoenix || (HostileTarget.IsBossFromIcon() && HostileTarget.IsDying())) && EnkindleBahamutPvE.CanUse(out act)) return true;
+		if ((InBahamut && SummonBahamutPvE.Cooldown.ElapsedOneChargeAfterGCD(3) || InPhoenix || HostileTarget.IsBossFromIcon() && HostileTarget.IsDying()) && EnkindleBahamutPvE.CanUse(out act)) return true;
 		//Burst second part for bahamut
-		if ((InBahamut && SummonBahamutPvE.Cooldown.ElapsedOneChargeAfterGCD(3) || (HostileTarget.IsBossFromIcon() && HostileTarget.IsDying())) && DeathflarePvE.CanUse(out act)) return true;
+		if ((InBahamut && SummonBahamutPvE.Cooldown.ElapsedOneChargeAfterGCD(3) || HostileTarget.IsBossFromIcon() && HostileTarget.IsDying()) && DeathflarePvE.CanUse(out act)) return true;
 		//Change rekindle timing to avoid triple weaving issue if animation are unlocked
 		if (InPhoenix && SummonBahamutPvE.Cooldown.ElapsedOneChargeAfterGCD(1) && RekindlePvE.CanUse(out act)) return true;
 		//Special Titan
 		if (MountainBusterPvE.CanUse(out act)) return true;
 
 		//Painflare timing for tincture and rotation
-		if ((Player.HasStatus(false, StatusID.SearingLight) && InBahamut && (SummonBahamutPvE.Cooldown.ElapsedOneChargeAfterGCD(4) || ((!EnergyDrainPvE.Cooldown.IsCoolingDown || EnergyDrainPvE.Cooldown.ElapsedAfter(50))) && SummonBahamutPvE.Cooldown.ElapsedOneChargeAfterGCD(1)) ||
-			!SearingLightPvE.EnoughLevel || (HostileTarget.IsBossFromIcon() && HostileTarget.IsDying())) && PainflarePvE.CanUse(out act)) return true;
+		if ((Player.HasStatus(false, StatusID.SearingLight) && InBahamut && (SummonBahamutPvE.Cooldown.ElapsedOneChargeAfterGCD(4) || (!EnergyDrainPvE.Cooldown.IsCoolingDown || EnergyDrainPvE.Cooldown.ElapsedAfter(50)) && SummonBahamutPvE.Cooldown.ElapsedOneChargeAfterGCD(1)) ||
+			!SearingLightPvE.EnoughLevel || HostileTarget.IsBossFromIcon() && HostileTarget.IsDying()) && PainflarePvE.CanUse(out act)) return true;
 		//fester timing for tincture and rotation
-		if ((Player.HasStatus(false, StatusID.SearingLight) && InBahamut && (SummonBahamutPvE.Cooldown.ElapsedOneChargeAfterGCD(4) || ((!EnergyDrainPvE.Cooldown.IsCoolingDown || EnergyDrainPvE.Cooldown.ElapsedAfter(50))) && SummonBahamutPvE.Cooldown.ElapsedOneChargeAfterGCD(1)) ||
-			!SearingLightPvE.EnoughLevel || (HostileTarget.IsBossFromIcon() && HostileTarget.IsDying())) && FesterPvE.CanUse(out act)) return true;
+		if ((Player.HasStatus(false, StatusID.SearingLight) && InBahamut && (SummonBahamutPvE.Cooldown.ElapsedOneChargeAfterGCD(4) || (!EnergyDrainPvE.Cooldown.IsCoolingDown || EnergyDrainPvE.Cooldown.ElapsedAfter(50)) && SummonBahamutPvE.Cooldown.ElapsedOneChargeAfterGCD(1)) ||
+			!SearingLightPvE.EnoughLevel || HostileTarget.IsBossFromIcon() && HostileTarget.IsDying()) && FesterPvE.CanUse(out act)) return true;
 
 		//energy siphon recharge
 		if (EnergySiphonPvE.CanUse(out act)) return true;
 		//energy drain recharge
 		if (EnergyDrainPvE.CanUse(out act)) return true;
-		
-		return base.AttackAbility(nextGCD, out act);
 		#endregion
-	}
-
-	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
-	{
-		act = null;
-
+		
 		#region PvP
-		if (GuardCancel && Player.HasStatus(true, StatusID.Guard)) return false;
+		if (GuardCancel && Player.HasStatus(true, StatusID.Guard)) return base.AttackAbility(nextGCD, out act);
 
 		if (GetPlayerHealthPercent() < 50 && RadiantAegisPvP.CanUse(out act)) return true;
-		if (Player.HasStatus(true, StatusID.DreadwyrmTrance))
+		if (LimitBreakLevel==1 && UseBahamutPvP && SummonBahamutPvP.CanUse(out act)) return true;
+		if (LimitBreakLevel==1 && UsePhoenixPvP && SummonPhoenixPvP.CanUse(out act)) return true;
+		if (Player.HasStatus(true, StatusID.DreadwyrmTrance_3228))
 		{
 			if (EnkindleBahamutPvP.CanUse(out act)) return true;
 		}
@@ -253,10 +253,15 @@ public sealed class SmnRotation : SummonerRotation
 		if (MountainBusterPvP.CanUse(out act)) return true;
 		if (FesterPvP.CanUse(out act, CanUseOption.UsedUp)) return true;
 		#endregion
+		
+		return base.AttackAbility(nextGCD, out act);
+	}
 
+	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
+	{
 		#region PvE
 		// Adding tincture timing to rotations
-		if (((SearingLightPvE.Cooldown.IsCoolingDown || Player.HasStatus(false, StatusID.SearingLight)) && InBahamut) && (UseBurstMedicine(out act))) return true;
+		if ((SearingLightPvE.Cooldown.IsCoolingDown || Player.HasStatus(false, StatusID.SearingLight)) && InBahamut && UseBurstMedicine(out act)) return true;
 
 		// moved swift usage on emergency to avoid unsended swift
 		switch (AddSwiftCast)
@@ -274,25 +279,23 @@ public sealed class SmnRotation : SummonerRotation
 			}
 			break;
 		case SwiftType.All:
-			if ((InGaruda && Player.Level > 86) || InIfrit)
+			if (InGaruda && Player.Level > 86 || InIfrit)
 			{
 				if (SwiftcastPvE.CanUse(out act)) return true;
 			}
 			break;
 		case SwiftType.No:
 			break;
-		default:
-			break;
 		}
 
-		if (RadiantOnCooldown && (RadiantAegisPvE.Cooldown.CurrentCharges == 2) && SummonBahamutPvE.Cooldown.IsCoolingDown && RadiantAegisPvE.CanUse(out act)) return true;
+		if (RadiantOnCooldown && RadiantAegisPvE.Cooldown.CurrentCharges == 2 && SummonBahamutPvE.Cooldown.IsCoolingDown && RadiantAegisPvE.CanUse(out act)) return true;
 		if (RadiantOnCooldown && Player.Level < 88 && SummonBahamutPvE.IsInCooldown && RadiantAegisPvE.CanUse(out act, CanUseOption.UsedUp)) return true;
 
-		return base.EmergencyAbility(nextGCD, out act);
 		#endregion
+		return base.EmergencyAbility(nextGCD, out act);
 	}
 
-	protected override IAction CountDownAction(float remainTime)
+	protected override IAction? CountDownAction(float remainTime)
 	{
 		if (SummonCarbunclePvE.CanUse(out _)) return SummonCarbunclePvE;
 		//1.5s prepull ruin 
