@@ -127,7 +127,8 @@ public sealed class SMN_IcWa : SummonerRotation
         if ((InBahamut || InSolarBahamut && Player.HasStatus(false, StatusID.SearingLight) && (SummonBahamutPvE.Cooldown.ElapsedOneChargeAfterGCD(4) || !EnergyDrainPvE.Cooldown.IsCoolingDown) || !SearingLightPvE.EnoughLevel || IsTargetBoss && IsTargetDying) && FesterPvE.CanUse(out act) || NecrotizePvE.CanUse(out act)) return true;
         
 
-        if ((InBahamut || InSolarBahamut && (SummonSolarBahamutPvE.Cooldown.IsCoolingDown || SummonBahamutPvE.Cooldown.IsCoolingDown || IsTargetBoss && IsTargetDying)) && Player.HasStatus(false,StatusID.RefulgentLux) && SearingFlashPvE.Cooldown.HasOneCharge && SearingFlashPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if ((InBahamut || InSolarBahamut && (SummonSolarBahamutPvE.Cooldown.ElapsedOneChargeAfterGCD(5) || IsTargetBoss && IsTargetDying)) && SearingFlashPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (DoesAnyPlayerNeedHeal() && !InBahamut || !InSolarBahamut && LuxSolarisPvE.CanUse(out act, skipAoeCheck: true)) return true;
         
         return base.AttackAbility(nextGCD,out act);
     }
@@ -195,6 +196,11 @@ public sealed class SMN_IcWa : SummonerRotation
 
     #region Extra Methods
     public override bool CanHealSingleSpell => false;
+
+    public bool DoesAnyPlayerNeedHeal()
+    { 
+        return PartyMembersAverHP < 80.0f;
+    }
 
     #endregion
 }
