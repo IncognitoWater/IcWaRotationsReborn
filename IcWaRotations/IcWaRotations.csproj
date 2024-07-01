@@ -38,6 +38,9 @@
 		  <HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
 		  <Private>False</Private>
 	  </Reference>
+	  <Reference Include="RotationSolver.Basic">
+	    <HintPath>..\..\RotationSolverReborn\RotationSolver\bin\x64\Debug\net8.0-windows\RotationSolver.Basic.dll</HintPath>
+	  </Reference>
 	  <Using Include="Dalamud.Game.ClientState.JobGauge.Enums" />
 	  <Using Include="Dalamud.Game.ClientState.Objects.Types" />
 	  <Using Include="Dalamud.Interface" />
@@ -53,8 +56,5 @@
 	  <Using Include="RotationSolver.Basic.Rotations.Basic" />
 	  <Using Include="System.Numerics" />
 	  <Using Include="System.Reflection" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="RotationSolverReborn.Basic" Version="4.1.1.14" />
   </ItemGroup>
 </Project>
